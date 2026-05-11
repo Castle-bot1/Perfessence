@@ -1,0 +1,86 @@
+INICIO
+
+  // ============================================
+  // PASO 1: RECIBIR AL USUARIO
+  // ============================================
+  
+  RECIBIR usuario
+  
+  SI usuario es nuevo ENTONCES
+    MOSTRAR quiz de preferencias
+    RECIBIR respuestas del quiz
+    CREAR perfil del usuario con:
+      - familia olfativa favorita
+      - intensidad preferida
+      - ocasión de uso
+      - presupuesto
+    GUARDAR perfil en base de datos
+    
+  FIN SI
+
+  // ============================================
+  // PASO 2: BUSCAR USUARIOS SIMILARES
+  // ============================================
+  
+  PARA CADA usuario_existente EN base_de_datos HACER
+    similitud = CALCULAR similitud coseno(usuario, usuario_existente)
+    GUARDAR similitud en lista_similitudes
+  FIN PARA
+  
+  ORDENAR lista_similitudes de mayor a menor
+  usuarios_similares = TOMAR los 5 primeros de lista_similitudes
+
+  // ============================================
+  // PASO 3: RECOPILAR PERFUMES CANDIDATOS
+  // ============================================
+  
+  PARA CADA usuario_similar EN usuarios_similares HACER
+    AGREGAR sus perfumes mejor calificados a lista_candidatos
+  FIN PARA
+  
+  // Eliminar perfumes que el usuario ya conoce
+  PARA CADA perfume EN lista_candidatos HACER
+    SI perfume YA FUE visto por usuario ENTONCES
+      ELIMINAR perfume de lista_candidatos
+    FIN SI
+  FIN PARA
+
+  // ============================================
+  // PASO 4: CALCULAR SCORE FINAL
+  // ============================================
+  
+  PARA CADA perfume EN lista_candidatos HACER
+  
+    score_colaborativo = promedio de ratings de usuarios_similares
+    score_contenido = similitud coseno(perfil_usuario, atributos_perfume)
+    
+    SI usuario tiene historial ENTONCES
+      alpha = 0.7
+    SINO
+      alpha = 0.3
+    FIN SI
+    
+    score_final = (alpha × score_colaborativo) + ((1 - alpha) × score_contenido)
+    
+    GUARDAR score_final del perfume
+    
+  FIN PARA
+
+  // ============================================
+  // PASO 5: MOSTRAR RECOMENDACIONES
+  // ============================================
+  
+  ORDENAR lista_candidatos por score_final de mayor a menor
+  recomendaciones = TOMAR los 5 primeros
+  MOSTRAR recomendaciones al usuario
+
+  // ============================================
+  // PASO 6: RECIBIR FEEDBACK
+  // ============================================
+  
+  SI usuario califica un perfume ENTONCES
+    GUARDAR calificacion en base_de_datos
+    ACTUALIZAR perfil del usuario
+  FIN SI
+
+FIN
