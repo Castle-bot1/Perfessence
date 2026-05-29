@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfessence Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f7f4;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 2rem 1rem;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 2.5rem;
+        }
+
+        .progress-wrap { margin-bottom: 2.5rem; }
+        .progress-track {
+            height: 3px;
+            background: #e5e3df;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #534AB7;
+            border-radius: 99px;
+            transition: width 0.4s ease;
+        }
+        .progress-label { font-size: 12px; color: #aaa; font-weight: 500; }
+
+        .step { display: none; animation: fadeUp 0.35s ease; }
+        .step.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-question {
+            font-size: 24px;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1.3;
+            margin-bottom: 1.75rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .opt-btn {
+            background: #fff;
+            border: 1px solid #e0ddd8;
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            color: #1a1a1a;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .opt-btn:hover { background: #f4f2ff; border-color: #9d97e0; }
+        .opt-btn.selected {
+            border: 2px solid #534AB7;
+            background: #EEEDFE;
+            color: #3C3489;
+            font-weight: 500;
+        }
+        .opt-btn i { font-size: 20px; }
+
+        .name-input {
+            width: 100%;
+            font-size: 22px;
+            font-weight: 500;
+            border: none;
+            border-bottom: 2px solid #ddd;
+            padding: 8px 0;
+            background: transparent;
+            color: #1a1a1a;
+            outline: none;
+            margin-bottom: 2rem;
+        }
+        .name-input:focus { border-bottom-color: #534AB7; }
+        .name-input::placeholder { color: #bbb; font-weight: 400; }
+
+        .nav-row { display: flex; gap: 10px; align-items: center; }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .btn-back:hover { background: #f5f5f5; }
+
+        .btn-next {
+            flex: 1;
+            background: #534AB7;
+            border: none;
+            border-radius: 10px;
+            padding: 13px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+        }
+        .btn-next:hover { background: #3C3489; }
+        .btn-next:disabled { opacity: 0.35; cursor: default; }
+    </style>
+</head>
+
+<body>
+
+    <!-- Campos ocultos que lee submitQuiz() en test.js — NO TOCAR -->
+    <input type="hidden" id="username">
+    <input type="hidden" id="gender">
+    <input type="hidden" id="family">
+    <input type="hidden" id="occasion">
+    <input type="hidden" id="intensity">
+
+    <div class="quiz-container">
+
+        <div class="brand">Perfessence</div>
+
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="progress-label" id="progressLabel">Paso 1 de 5</div>
+        </div>
+
+        <!-- Paso 1: Nombre -->
+        <div class="step active" id="step-0">
+            <div class="step-question">¿Cuál es tu nombre?</div>
+            <input type="text" class="name-input" id="nameInput" placeholder="Escribe aquí..."
+                autocomplete="off"
+                oninput="checkText()"
+                onkeydown="if(event.key==='Enter') tryNext(0)">
+            <div class="nav-row">
+                <button class="btn-next" id="next-0" onclick="goNext(0)" disabled>Continuar</button>
+            </div>
+        </div>
+
+        <!-- Paso 2: Género -->
+        <div class="step" id="step-1">
+            <div class="step-question">¿Para qué género buscas el perfume?</div>
+            <div class="options-grid">
+                <button class="opt-btn" onclick="selectOpt(1,this,'Hombre')"><i class="ti ti-man"></i>Hombre</button>
+                <button class="opt-btn" onclick="selectOpt(1,this,'Mujer')"><i class="ti ti-woman"></i>Mujer</button>
+                <button class="opt-btn" onclick="selectOpt(1,this,'Unisex')"><i class="ti ti-users"></i>Unisex</button>
+            </div>
+            <div class="nav-row">
+                <button class="btn-back" onclick="goBack(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+                <button class="btn-next" id="next-1" onclick="goNext(1)" disabled>Continuar</button>
+            </div>
+        </div>
+
+        <!-- Paso 3: Familia olfativa -->
+        <div class="step" id="step-2">
+            <div class="step-question">¿Cuál es tu familia olfativa favorita?</div>
+            <div class="options-grid">
+                <button class="opt-btn" onclick="selectOpt(2,this,'Dulce')"><i class="ti ti-ice-cream"></i>Dulce</button>
+                <button class="opt-btn" onclick="selectOpt(2,this,'Amaderada')"><i class="ti ti-tree"></i>Amaderada</button>
+                <button class="opt-btn" onclick="selectOpt(2,this,'Floral')"><i class="ti ti-plant"></i>Floral</button>
+                <button class="opt-btn" onclick="selectOpt(2,this,'Cítrica')"><i class="ti ti-lemon"></i>Cítrica</button>
+                <button class="opt-btn" onclick="selectOpt(2,this,'Oriental')"><i class="ti ti-moon"></i>Oriental</button>
+                <button class="opt-btn" onclick="selectOpt(2,this,'Fresca')"><i class="ti ti-wind"></i>Fresca</button>
+            </div>
+            <div class="nav-row">
+                <button class="btn-back" onclick="goBack(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
+                <button class="btn-next" id="next-2" onclick="goNext(2)" disabled>Continuar</button>
+            </div>
+        </div>
+
+        <!-- Paso 4: Ocasión -->
+        <div class="step" id="step-3">
+            <div class="step-question">¿Para qué ocasión lo buscas?</div>
+            <div class="options-grid">
+                <button class="opt-btn" onclick="selectOpt(3,this,'Noche')"><i class="ti ti-moon-stars"></i>Noche</button>
+                <button class="opt-btn" onclick="selectOpt(3,this,'Trabajo')"><i class="ti ti-briefcase"></i>Trabajo</button>
+                <button class="opt-btn" onclick="selectOpt(3,this,'Cita')"><i class="ti ti-heart"></i>Cita</button>
+                <button class="opt-btn" onclick="selectOpt(3,this,'Fiesta')"><i class="ti ti-confetti"></i>Fiesta</button>
+                <button class="opt-btn" onclick="selectOpt(3,this,'Uso Diario')"><i class="ti ti-sun"></i>Uso Diario</button>
+            </div>
+            <div class="nav-row">
+                <button class="btn-back" onclick="goBack(3)"><i class="ti ti-arrow-left"></i> Atrás</button>
+                <button class="btn-next" id="next-3" onclick="goNext(3)" disabled>Continuar</button>
+            </div>
+        </div>
+
+        <!-- Paso 5: Intensidad -->
+        <div class="step" id="step-4">
+            <div class="step-question">¿Qué intensidad prefieres?</div>
+            <div class="options-grid">
+                <button class="opt-btn" onclick="selectOpt(4,this,'Alta')"><i class="ti ti-flame"></i>Alta</button>
+                <button class="opt-btn" onclick="selectOpt(4,this,'Media')"><i class="ti ti-adjustments-horizontal"></i>Media</button>
+                <button class="opt-btn" onclick="selectOpt(4,this,'Suave')"><i class="ti ti-feather"></i>Suave</button>
+            </div>
+            <div class="nav-row">
+                <button class="btn-back" onclick="goBack(4)"><i class="ti ti-arrow-left"></i> Atrás</button>
+                <button class="btn-next" id="next-4" onclick="goNext(4)" disabled>Obtener recomendaciones</button>
+            </div>
+        </div>
+
+        <!-- Resultados — submitQuiz() escribe aquí igual que antes -->
+        <div id="results" class="mt-5"></div>
+
+    </div>
+
+    <script src="/static/test.js"></script>
+
+    <script>
+        const opts = { 1: 'gender', 2: 'family', 3: 'occasion', 4: 'intensity' };
+        const total = 5;
+
+        function updateProgress(step) {
+            document.getElementById('progressFill').style.width = (step / total * 100) + '%';
+            document.getElementById('progressLabel').textContent = 'Paso ' + (step + 1) + ' de ' + total;
+        }
+
+        function checkText() {
+            const val = document.getElementById('nameInput').value.trim();
+            document.getElementById('next-0').disabled = val.length < 1;
+        }
+
+        function tryNext(step) {
+            if (!document.getElementById('next-' + step).disabled) goNext(step);
+        }
+
+        function selectOpt(step, btn, val) {
+            btn.closest('.options-grid').querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById(opts[step]).value = val;
+            document.getElementById('next-' + step).disabled = false;
+        }
+
+        function goNext(step) {
+            if (step === 0) {
+                document.getElementById('username').value = document.getElementById('nameInput').value.trim();
+            }
+            document.getElementById('step-' + step).classList.remove('active');
+            if (step < total - 1) {
+                document.getElementById('step-' + (step + 1)).classList.add('active');
+                updateProgress(step + 1);
+            } else {
+                document.getElementById('progressWrap').style.display = 'none';
+                submitQuiz(); // llama directo a tu función original
+            }
+        }
+
+        function goBack(step) {
+            document.getElementById('step-' + step).classList.remove('active');
+            document.getElementById('step-' + (step - 1)).classList.add('active');
+            updateProgress(step - 1);
+        }
+    </script>
+
+</body>
+</html>
